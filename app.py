@@ -1,29 +1,45 @@
 import random
-from check_array import check_array
+from check_array import check
 
-code_array = ['x', 'x', 'x', 'x']
-game_board_array = ['x', 'x', 'x', 'x']
+# Array of the answer
+code = ['x', 'x', 'x', 'x']
+
+# Array of the current line being used in the game_board
+game_line = ['x', 'x', 'x', 'x']
 
 
-def place(arr, color, pos):
-    # replace array postion by color
+def get_line():
+    return game_line
+
+
+def place_color(arr, color, pos):
+    """
+    Set the color inside the line of the game at the correct position.
+
+    :param arr: Array of the line being used
+    :param color: Integer of the color represented
+    :param pos: Index of the position in the line
+    """
     arr[pos] = color
     print("Placing {} at index {}.".format(color, pos))
-    return arr
 
 
 def generate_code(arr):
-    # iterate on arr to replace x by random num
+    """
+    :param arr: Placeholder array for the generation of the code
+    """
     for idx, value in enumerate(arr):
         arr[idx] = random.randint(0, 5)
 
+    print("---Start Generate code---")
     print("Generated random code: ", arr)
-    return arr
+    print("---End Generate code---")
 
 
-generate_code(code_array)
-place(game_board_array, 1, 0)
-place(game_board_array, 5, 1)
-place(game_board_array, 3, 2)
-place(game_board_array, 4, 3)
-print(check_array(code_array, game_board_array))
+# Testing
+generate_code(code)
+place_color(game_line, 1, 0)
+place_color(game_line, 5, 1)
+place_color(game_line, 3, 2)
+place_color(game_line, 4, 3)
+check(code, game_line)
