@@ -112,7 +112,7 @@ class View:
             color = self.model.colors_arr[index]
 
             x_center = (index * COLOR_FRAME_WIDTH/len(self.model.colors_arr)) + self.sq_sz_x/2
-            y_center = self.sq_sz_y/2
+            y_center = COLOR_FRAME_HEIGHT/2
 
             x0, y0, x1, y1 = self.circle_coords_converter(x_center, y_center, 15)
             oval_instance = self.color_canvas.create_oval(x0, y0, x1, y1, fill=color, tags=color)
