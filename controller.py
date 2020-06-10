@@ -16,8 +16,6 @@ class Controller:
         hints = ["None"] * (self.model.cols - 2)
         tracker = Counter(self.model.code)
 
-        print(tracker)
-
         # Look for all the red hints first
         for index in range(len(self.model.code)):
             color_in_line = self.model.game_line[index]
@@ -69,7 +67,7 @@ class Controller:
             print("Can't handle")
 
     def handle_delete_line(self):
-        self.model.game_line = [None] * self.model.cols
+        self.model.game_line = [None] * (self.model.cols - 2)
         self.model.circles_line = []
 
     def handle_check(self):
@@ -77,6 +75,9 @@ class Controller:
         if None not in self.model.game_line and len(self.model.current_hints) == 0:
             self.model.current_hints = self.check()
             self.model.current_row += 1
+
+            # Make sure you reset this array to not erase the circles in the line above
+            self.model.circles_line = []
         elif None in self.model.game_line:
             pass
         else:
@@ -84,12 +85,20 @@ class Controller:
 
     def game_over(self):
         only_red = len(set(self.model.current_hints)) == 1 and self.model.current_hints[0] == "Red"
+
         if only_red:
             self.model.game_over = True
-            self.model.won = True
+            self.model.game_won = True
 
         elif self.model.current_row == self.model.rows:
             self.model.game_over = True
-            self.model.won = False
+            self.model.game_won = False
+
         else:
             self.model.game_over = False
+
+        # Reset the current_hints
+        self.model.current_hints = []
+
+        # Reset game_line just in case
+        self.model.game_line = [None] * (self.model.cols - 2)

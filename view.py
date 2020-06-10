@@ -82,7 +82,8 @@ class View:
                 y_center = y0 + self.sq_sz_y/2
 
                 rectangle_instance = self.canvas.create_rectangle(x0, y0, x1, y1, outline="black",
-                                                                  fill="lightgrey", tags=(row, col, x_center, y_center))
+                                                                  fill="lightgrey",
+                                                                  tags=(row, col, x_center, y_center))
                 self.canvas.tag_bind(rectangle_instance, '<ButtonPress-1>', self.on_object_click)
 
                 if col == 0:
@@ -159,7 +160,7 @@ class View:
 
             # Get the coordinates and create the circle
             x0, y0, x1, y1 = self.circle_coords_converter(x_center, y_center, 15)
-            placed_oval = self.canvas.create_oval(x0, y0, x1, y1, fill=self.model.current_color)
+            placed_oval = self.canvas.create_oval(x0, y0, x1, y1, fill=self.model.current_color, tags="play")
 
             # Set the created circle in an array to be able to delete it if needed
             self.model.circles_line.append(placed_oval)
@@ -200,6 +201,19 @@ class View:
         print("Check line: ", self.model.game_line)
         print("Check line: ", self.model.circles_line)
 
+    def reset_view(self):
+        for x in self.canvas.find_withtag('hint'):
+            self.canvas.delete(x)
+
+        for x in self.canvas.find_withtag('play'):
+            self.canvas.delete(x)
+
+    def play_again(self):
+        self.reset_view()
+        self.model.reset_model()
+        self.model.generate_code()
+        self.popup.destroy()
+
     def check_line(self):
         # Callback called when the line is being checked
         self.controller.handle_check()
@@ -222,19 +236,26 @@ class View:
                     self.canvas.create_oval(top_left_x + 10 + (10 * col),
                                             top_left_y + 10 + (10 * row),
                                             top_left_x + 10 + (10 * col) + 5,
-                                            top_left_y + 10 + (10 * row) + 5, fill=self.model.current_hints[color_index - 1])
+                                            top_left_y + 10 + (10 * row) + 5,
+                                            fill=self.model.current_hints[color_index - 1], tags="hint")
 
-            # Reset the current_hints
-            self.model.current_hints = []
-
-            # Reset game_line just in case
-            self.model.game_line = [None] * (self.cols - 2)
+        self.controller.game_over()
 
         if self.model.game_over and self.model.game_won:
-            # Ask if player wants to play again
-            # Show you won
-            pass
+            self.end_popup("gagné")
+
         elif self.model.game_over and self.model.game_won is False:
-            # Ask if player wants to play again
-            # Show you lost
-            pass
+            self.end_popup("perdu")
+
+    def end_popup(self, won_or_lost):
+        popup = self.popup = Toplevel(self.parent)  # Popup -> Toplevel()
+
+        popup.title('Game over')
+        w = Label(popup, text="Vous avez {} !".format(won_or_lost))
+        w.pack()
+        Button(popup, text='Rejouer', command=self.play_again).pack(padx=10, pady=10)
+        Button(popup, text='Quitter', command=self.parent.destroy).pack(padx=10, pady=10)
+
+        popup.transient(self.parent)  # Réduction popup impossible
+        popup.grab_set()  # Interaction avec fenetre jeu impossible
+        self.parent.wait_window(popup)  # Arrêt script principal
