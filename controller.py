@@ -1,4 +1,5 @@
 from model import Model
+from collections import Counter
 
 
 class Controller:
@@ -12,23 +13,35 @@ class Controller:
 
         :return: Array of pawns for validation either Red(color and position), White(color) or empty(none)
         """
-        hints = []
+        hints = ["None"] * (self.model.cols - 2)
+        tracker = Counter(self.model.code)
 
+        print(tracker)
+
+        # Look for all the red hints first
         for index in range(len(self.model.code)):
             color_in_line = self.model.game_line[index]
             color_in_code = self.model.code[index]
 
             # Same color and same position, set red pawn
             if color_in_code == color_in_line:
-                hints.append("Red")
+                tracker[color_in_line] -= 1
+                hints[index] = "Red"
+
+        # Then look for white and black
+        for index in range(len(self.model.code)):
+            color_in_line = self.model.game_line[index]
 
             # Color is in the answer, but not at the right position, set white pawn
-            elif color_in_line in self.model.code:
-                hints.append("White")
+            if color_in_line in self.model.code and hints[index] != "Red":
+                if tracker[color_in_line] >= 1:
+                    hints[index] = "White"
+                else:
+                    hints[index] = "Black"
 
             # Colors isn't in the answer.
-            else:
-                hints.append("Black")
+            elif hints[index] != "Red":
+                hints[index] = "Black"
 
         # Array must be of length of 4 (it verified each color of the line)
         if len(hints) != (self.model.cols - 2):
