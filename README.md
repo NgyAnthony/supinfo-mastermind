@@ -4,6 +4,14 @@ Simple mastermind, MVC/Tkinter.
 
 ![](https://i.imgur.com/ZS4qynY.png)
 
+
+## How to start
+Launch app.py to start the application.
+
+## Requirements
+- Python 3.8
+- Tkinter
+
 ## Features
 - Hints are purposely set in order:
   - Black = color isn't in the code
@@ -13,10 +21,3 @@ Simple mastermind, MVC/Tkinter.
 - Able to choose number of rows/cols
 - Manual check of the line
 - Able to choose non-generated code
-
-## Requirements
-- Python 3.8
-- Tkinter
-
-## How to start
-Launch app.py to start the application.
