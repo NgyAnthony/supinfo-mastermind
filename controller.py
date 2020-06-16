@@ -78,10 +78,8 @@ class Controller:
 
             # Make sure you reset this array to not erase the circles in the line above
             self.model.circles_line = []
-        elif None in self.model.game_line:
-            pass
         else:
-            raise ValueError("Unexpected error: line checked before it is filled.")
+            print("Unexpected error: line checked before it is filled.")
 
     def game_over(self):
         only_red = len(set(self.model.current_hints)) == 1 and self.model.current_hints[0] == "Red"

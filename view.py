@@ -253,6 +253,8 @@ class View:
                                         top_left_x + 10 + (10 * col) + 5,
                                         top_left_y + 10 + (10 * 1) + 5,
                                         fill=self.model.current_hints[color_index - 1], tags="hint")
+        else:
+            return
 
         # Check if the game is won or lost
         self.controller.game_over()
