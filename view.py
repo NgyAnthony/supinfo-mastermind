@@ -1,4 +1,5 @@
 from tkinter import *
+from tkinter import ttk
 from controller import Controller
 
 # Specific configuration for the width and height of each element
@@ -30,32 +31,42 @@ class View:
         self.controller = Controller()
         self.model = self.controller.model
 
-        # Initiate a frame that will contain the UI
-        self.ui_frame = Frame(master=self.parent, height=CONTAINER_UI_HEIGHT, width=CONTAINER_UI_WIDTH, bd=1, relief=SUNKEN)
-
-        # Initiate a container that will contain the game and the color palette above the game board
-        self.game_container = Frame(master=self.parent, height=CONTAINER_GAME_HEIGHT, width=CONTAINER_GAME_WIDTH, bd=1, relief=SUNKEN)
-        self.game_frame = Frame(master=self.game_container, height=GAME_FRAME_HEIGHT, width=GAME_FRAME_WIDTH)
-        self.color_frame = Frame(master=self.game_container, height=COLOR_FRAME_HEIGHT, width=COLOR_FRAME_WIDTH, bd=1, relief=SUNKEN)
-
         # Placeholder for the circle geometry attached to the cursor
         self.attached_circle = "Null"
-
-        # Attach a canvas to the game board and another to the color palette frame
-        self.canvas = Canvas(self.game_frame, height=GAME_FRAME_HEIGHT, width=GAME_FRAME_WIDTH)
-        self.color_canvas = Canvas(self.color_frame, height=COLOR_FRAME_HEIGHT, width=COLOR_FRAME_WIDTH)
-
-        # Set the number of rows and cols you want
-        self.rows = self.model.rows
-        self.cols = self.model.cols
-        (self.sq_sz_x, self.sq_sz_y) = (GAME_FRAME_WIDTH // self.cols, GAME_FRAME_HEIGHT // self.rows)
 
         # Make the UI appear
         self.draw_board()
 
         mainloop()
 
+    def define_dimensions(self):
+        # Set the number of rows and cols you want
+        self.rows = self.model.rows
+        self.cols = self.model.cols
+        (self.sq_sz_x, self.sq_sz_y) = (GAME_FRAME_WIDTH // self.cols, GAME_FRAME_HEIGHT // self.rows)
+
+    def define_frames(self):
+        # Initiate a frame that will contain the UI
+        self.ui_frame = Frame(master=self.parent, height=CONTAINER_UI_HEIGHT, width=CONTAINER_UI_WIDTH, bd=1,
+                              relief=SUNKEN)
+
+        # Initiate a container that will contain the game and the color palette above the game board
+        self.game_container = Frame(master=self.parent, height=CONTAINER_GAME_HEIGHT, width=CONTAINER_GAME_WIDTH, bd=1,
+                                    relief=SUNKEN)
+        self.game_frame = Frame(master=self.game_container, height=GAME_FRAME_HEIGHT, width=GAME_FRAME_WIDTH)
+        self.color_frame = Frame(master=self.game_container, height=COLOR_FRAME_HEIGHT, width=COLOR_FRAME_WIDTH, bd=1,
+                                 relief=SUNKEN)
+
+    def define_canvas(self):
+        # Attach a canvas to the game board and another to the color palette frame
+        self.canvas = Canvas(self.game_frame, height=GAME_FRAME_HEIGHT, width=GAME_FRAME_WIDTH)
+        self.color_canvas = Canvas(self.color_frame, height=COLOR_FRAME_HEIGHT, width=COLOR_FRAME_WIDTH)
+
     def draw_board(self):
+        self.define_dimensions()
+        self.define_frames()
+        self.define_canvas()
+
         # Draw the whole board (frame, canvas)
         self.canvas.pack()
         self.color_canvas.pack()
@@ -94,8 +105,10 @@ class View:
                     self.draw_circle(x_center, y_center, 2.5)
 
     def draw_ui(self):
-        Button(self.ui_frame, text="Delete line", command=self.delete_line).pack()
-        Button(self.ui_frame, text="Check line", command=self.check_line).pack()
+        Button(self.ui_frame, text="Choisir un code", command=self.custom_code).pack(pady=10)
+        Button(self.ui_frame, text="Changer le nombre de lignes/colonnes", command=self.custom_game).pack(pady=10)
+        Button(self.ui_frame, text="Supprimer la ligne", command=self.delete_line).pack(pady=10)
+        Button(self.ui_frame, text="Vérifier la ligne", command=self.check_line).pack(pady=10)
 
     def draw_number(self, x_center, y_center, index):
         # Numbers that are on the first column
@@ -202,6 +215,7 @@ class View:
         print("Check line: ", self.model.circles_line)
 
     def reset_view(self):
+        # Deletes every hint and color on the canvas
         for x in self.canvas.find_withtag('hint'):
             self.canvas.delete(x)
 
@@ -209,6 +223,8 @@ class View:
             self.canvas.delete(x)
 
     def play_again(self):
+        # This function is called when the same game board properties are used and the
+        # player wants to play again.
         self.reset_view()
         self.model.reset_model()
         self.model.generate_code()
@@ -227,20 +243,21 @@ class View:
             # Color index is used to keep track of the index in current_hints
             color_index = 0
 
-            # 6 board cols -2 = 4 game cols = 2 row and 2 col in the hints so we divide by 2
-            for row in range(int(round((self.cols - 2) / 2))):
-                for col in range(int(round((self.cols - 2) / 2))):
-                    if color_index < self.cols - 2:
-                        color_index += 1
+            # Draw the hints
+            for col in range(self.cols - 2):
+                if color_index < self.cols - 2:
+                    color_index += 1
 
-                    self.canvas.create_oval(top_left_x + 10 + (10 * col),
-                                            top_left_y + 10 + (10 * row),
-                                            top_left_x + 10 + (10 * col) + 5,
-                                            top_left_y + 10 + (10 * row) + 5,
-                                            fill=self.model.current_hints[color_index - 1], tags="hint")
+                self.canvas.create_oval(top_left_x + 10 + (10 * col),
+                                        top_left_y + 10 + (10 * 1),
+                                        top_left_x + 10 + (10 * col) + 5,
+                                        top_left_y + 10 + (10 * 1) + 5,
+                                        fill=self.model.current_hints[color_index - 1], tags="hint")
 
+        # Check if the game is won or lost
         self.controller.game_over()
 
+        # If so, then game_over() modified the model and we'll summon a popup here
         if self.model.game_over and self.model.game_won:
             self.end_popup("gagné")
 
@@ -248,14 +265,88 @@ class View:
             self.end_popup("perdu")
 
     def end_popup(self, won_or_lost):
+        # This is the end game pop up, it appears when the player lost or won.
         popup = self.popup = Toplevel(self.parent)  # Popup -> Toplevel()
 
         popup.title('Game over')
-        w = Label(popup, text="Vous avez {} !".format(won_or_lost))
-        w.pack()
+        Label(popup, text="Vous avez {} !".format(won_or_lost)).pack()
+
+        Label(popup, text="Le code était:").pack()
+
+        for color in self.model.code:
+            Label(popup, text="{}".format(color), fg=color).pack()
+
         Button(popup, text='Rejouer', command=self.play_again).pack(padx=10, pady=10)
         Button(popup, text='Quitter', command=self.parent.destroy).pack(padx=10, pady=10)
 
         popup.transient(self.parent)  # Réduction popup impossible
         popup.grab_set()  # Interaction avec fenetre jeu impossible
         self.parent.wait_window(popup)  # Arrêt script principal
+
+    def custom_game(self):
+        # This is the pop-up to create a new custom game (different rows and cols)
+        custom_popup = self.custom_popup = Toplevel(self.parent)  # Popup -> Toplevel()
+        custom_popup.title('Custom game')
+        Label(custom_popup, text="Choisir le nombre de lignes").pack()
+        list_rows = ttk.Combobox(custom_popup, values=self.model.PLAYABLE_ROWS)
+        list_rows.current(5)
+        list_rows.pack()
+
+        Label(custom_popup, text="Choisir le nombre de colonnes").pack()
+        list_cols = ttk.Combobox(custom_popup, values=self.model.PLAYABLE_COLS)
+        list_cols.current(0)
+        list_cols.pack()
+
+        Button(custom_popup, text='Jouer', command=lambda: self.define_grid(list_cols, list_rows)).pack(padx=10, pady=10)
+        Button(custom_popup, text='Annuler', command=self.custom_popup.destroy).pack(padx=10, pady=10)
+
+    def destroy_game(self):
+        # Destroy every frame/canvas
+        self.canvas.destroy()
+        self.color_canvas.destroy()
+        self.game_container.destroy()
+        self.ui_frame.destroy()
+        self.game_frame.destroy()
+        self.color_frame.destroy()
+
+    def define_grid(self, cols, rows):
+        # Define grid is used when there is a need to delete the current game,
+        # redefine the cols and rows of the model,
+        # and make the game re-appear.
+
+        # Reset the model and set new rows and cols from the combo boxes
+        self.model.reset_model()
+        self.rows = self.model.rows = int(rows.get())
+        self.cols = self.model.cols = int(cols.get())
+
+        # Redefine the properties dependant on cols and rows
+        self.model.set_game_context()
+
+        # Generate a new code
+        self.model.generate_code()
+
+        self.destroy_game()
+        self.custom_popup.destroy()
+
+        # Draw the board again
+        self.draw_board()
+
+    def custom_code(self):
+        code_popup = self.code_popup = Toplevel(self.parent)  # Popup -> Toplevel()
+        code_popup.title('Custom game')
+
+        Label(code_popup, text="Choisir le code").pack()
+
+        new_code = []
+        for color in self.model.code:
+            list_colors = ttk.Combobox(code_popup, values=self.model.colors_arr)
+            list_colors.pack()
+
+            new_code.append(list_colors)
+
+        Button(code_popup, text='Modifier', command=lambda: self.set_and_destroy(new_code)).pack(padx=10, pady=10)
+        Button(code_popup, text='Annuler', command=self.code_popup.destroy).pack(padx=10, pady=10)
+
+    def set_and_destroy(self, new_code):
+        self.model.set_code(new_code)
+        self.code_popup.destroy()

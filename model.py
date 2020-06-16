@@ -1,6 +1,6 @@
 import random
 
-ROWS = 10
+ROWS = 6
 COLS = 6
 COLOR_ARR = ["Green", "Blue", "Orange", "Red", "Yellow", "Purple"]
 
@@ -10,6 +10,8 @@ class Model:
         # Define the number of cols and rows you want (i.e 6 cols = 2 dedicated for the numbers and the hints)
         self.rows = ROWS
         self.cols = COLS
+        self.PLAYABLE_ROWS = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
+        self.PLAYABLE_COLS = [6, 8, 10]
 
         # MAYBE USELESS
         '''self.colors_dict = (
@@ -21,12 +23,6 @@ class Model:
             {5: "Purple"})'''
 
         self.colors_arr = COLOR_ARR
-
-        # Array of the answer
-        self.code: list = [None] * (self.cols - 2)
-
-        # Array of the current line being used in the game_board
-        self.game_line: list = [None] * (self.cols - 2)
 
         # Array of Tkinter circles (integer pointer) in the game line
         self.circles_line: list = []
@@ -42,6 +38,15 @@ class Model:
 
         self.game_over = False
         self.game_won = None
+
+        self.set_game_context()
+
+    def set_game_context(self):
+        # Array of the answer
+        self.code: list = [None] * (self.cols - 2)
+
+        # Array of the current line being used in the game_board
+        self.game_line: list = [None] * (self.cols - 2)
 
     def place_color(self, color, pos):
         """
@@ -91,3 +96,19 @@ class Model:
 
         self.game_over = False
         self.game_won = None
+
+    def set_code(self, new_code):
+        exception_flag = False
+        for color in new_code:
+            if color.get() not in self.colors_arr:
+                exception_flag = True
+
+        for x in range(len(new_code)):
+            if exception_flag is False:
+                self.code[x] = new_code[x].get()
+
+        if exception_flag:
+            print("Code entered was invalid, ignoring request", new_code)
+        else:
+            print("---Start code set---")
+            print("New code has been set: ", self.code)
