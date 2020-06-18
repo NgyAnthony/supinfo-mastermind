@@ -2,6 +2,11 @@
 
 Simple mastermind, MVC/Tkinter.
 
+## Group members
+- NGUYEN Anthony, A.Sc.1, 302443
+- AL ZRIR Wassim, A.Sc.1, 304168
+- GOMES Noah, A.Sc.1, 303127
+
 ![](https://i.imgur.com/ZS4qynY.png)
 
 
